@@ -89,4 +89,6 @@ hs_err_pid*
 
 node_modules/
 local.config_real.js
+local.config_template.js
 app_real.js
+app_template.js

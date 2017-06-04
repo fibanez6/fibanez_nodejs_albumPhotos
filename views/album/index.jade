@@ -1,0 +1,27 @@
+extends ../layout
+
+block content
+
+    div#album_page.album_page
+        - if (error)
+            p #{error}
+        - else
+            - if (data && data.albums)
+                div#links
+                    each album in data.albums
+                        div.col-lg-2.col-md-4.col-xs-12
+                            a(href=album.name, title=album.name, target="_self")
+                                - if (album.main_image)
+                                    div.frame
+                                        img(src='/img/album_frame_200x200.png', alt=album.name, height="230", width="230")
+                                    div.album-frame
+                                        img(src='/albums/test/2011-03-15 15.58.14.jpg', alt=album.name, height="175", width="175")
+                                - else
+                                    div.frame
+                                        img(src='/img/no_album_frame_200x200.png', alt=album.name, height="230", width="230")
+                            div
+                                a(href=album.name, title=album.name, target="_self") #{album.name}
+            - else
+                p There are not albums.
+
+        div(style="clear: left")

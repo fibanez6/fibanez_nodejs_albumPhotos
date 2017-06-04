@@ -1,0 +1,70 @@
+//
+   Created by fibanez on 15/8/15.
+
+extends layout
+block content
+   h1 Register
+
+   div(style="float: right")
+      a(href='/users/auth') Login
+
+   form(name="register", id="register", method="post")
+      div.error(id="error")
+      dl
+         dt Email address:
+         dd
+            input(type="text", name="email", id="email", size="30")
+         dt Display Name:
+         dd
+            input(type="text", name="display_name", id="display_name", size="30")
+         dt Password:
+         dd
+            input(type="password", name="password", id="password", size="30")
+         dt Password (confirm):
+         dd
+            input(type="password", name="password2", id="password2", size="30")
+         dd
+            input(type="submit", value="register")
+
+   script(type='text/javascript').
+      $(document).ready(function () {
+         if (window.location.href.match(/(fail)/) != null) {
+            $("#error").html("Failure creating account.");
+         }
+      });
+
+      $("form#register").submit(function (e) {
+         if (!$("input#email").val()
+            || !$("input#display_name").val()
+            || !$("input#password").val()
+            || !$("input#password2").val()) {
+            $("#error").html("You need to enter an email and password.");
+         } else if ($("input#password2").val() != $("input#password").val()) {
+            $("#error").html("Passwords don't match.");
+         } else {
+            var info = {
+               email: $("input#email").val(),
+               display_name: $("input#display_name").val(),
+               password: $("input#password").val()
+            };
+
+            $.ajax({
+               type: "PUT",
+               url: "/users/users.json",
+               data: JSON.stringify(info),
+                  contentType: "application/json; charset=utf-8",
+               dataType: "json",
+               success: function (data) {
+                  window.location = "/pages/admin/home";
+               },
+               error: function () {
+                  var ext = window.location.href.match(/(fail)/) ? "" : "?fail";
+                  window.location = window.location + ext;
+                  return false;
+               }
+            });
+         }
+         return false;
+      });
+
+

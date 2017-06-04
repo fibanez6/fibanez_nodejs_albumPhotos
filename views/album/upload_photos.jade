@@ -1,0 +1,62 @@
+extends ../layout
+block styles
+    link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/dropzone/4.0.1/basic.css')
+    link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/dropzone/4.0.1/dropzone.css')
+    link(rel='stylesheet', href='/styles/myDropzone.css')
+    link(rel='stylesheet', href='/styles/csshake.min.css')
+    //link(rel='stylesheet', href='/bootstrap/file-dialog/css/bootstrap.fd.css')
+
+block content
+
+    h2 Upload photos to #{data.album.name} album
+
+    div#actions.row
+        div.col-lg-4
+            span.btn.btn-success.fileinput-button(dz-clickable)
+                i.glyphicon.glyphicon-plus
+                span Add files...
+
+            button.btn.btn-primary.start(type="submit")
+                i.glyphicon.glyphicon-upload
+                span Start upload
+
+            button.btn.btn-danger.cancel(type="reset", data-dz-remove)
+                i.glyphicon.glyphicon-trash
+                span Delete all
+
+        div.col-lg-8
+            div.progress(style="display: none;")
+                div#total-progress.progress-bar.progress-bar-striped.active(
+                    role="progressbar", aria-valuenow="0", aria-valuemin="0", aria-valuemax="100", style="width: 0%;" data-dz-uploadprogress) 0%
+
+    form#add-photos(method="POST", enctype="multipart/form-data", action="/albums/#{data.album.name}/uploadfile").dropzone
+        div.fallback
+            input#file(type="file", name="file", accept="image/*", multiple="multiple")
+
+    div
+        a(href="/albums/#{data.album.name}", type="button").btn.btn-primary.pull-right
+            span Got to album
+            i.glyphicon.glyphicon-share-alt
+
+    !{data.template}
+
+    script(type='text/javascript' src="//cdnjs.cloudflare.com/ajax/libs/dropzone/4.0.1/dropzone.js")
+    script(type='text/javascript').
+        var options = {
+            url: $('form#add-photos').attr('action'), // Set the url
+            maxFilesize: 10,
+            autoQueue: false, // Make sure the files aren't queued until manually added
+            parallelUploads: 5,
+            //previewsContainer: "#previews", // Define the container to display the previews
+            clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+        };
+        var previewNode = document.querySelector("#template");
+        if (previewNode) {
+            previewNode.id = "";
+            var previewTemplate = previewNode.parentNode.innerHTML;
+            previewNode.parentNode.removeChild(previewNode);
+            options.previewTemplate = previewTemplate;
+        }
+        Dropzone.autoDiscover = false;
+        var myDropzone = new Dropzone("form#add-photos", options);
+    script(type='text/javascript' src="/js/myDropzone.js")

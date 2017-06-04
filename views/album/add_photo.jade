@@ -1,0 +1,177 @@
+extends ../layout
+
+block styles
+    //link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/bootstrap/file-dialog/css/bootstrap.fd.css')
+
+block content
+
+    form#add_photos(name="add_photos", method="PUT", enctype="multipart/form-data").form-horizontal
+        h2 Album form
+        div.progress(style="display: none;")
+            div.progress-bar.progress-bar-striped.active(
+            role="progressbar", aria-valuenow="0", aria-valuemin="0", aria-valuemax="100", style="width: 0%;") 0%
+
+        div#error.bg-danger
+
+        div.form-group
+            label(for="albumid").col-sm-2.control-label Album
+            div.col-sm-10
+                select#albumid(name="albumid", required="").form-control
+                    - if(data && data.albums)
+                        each album in data.albums
+                            option(value=album.name) #{album.name}
+
+        div.form-group
+            div.col-sm-2
+            div.col-sm-10
+                input#photo_files(type="file", name="photo_file", accept="image/*").form-control
+                //div.bfd-dropfield
+                    div#drop-zone.bfd-dropfield-inner(style="height: 200px; padding-top: 75px;") Just drag and drop files here
+                //div.container-fluid.bfd-files
+
+
+        input(type="hidden", name="date", id="date")
+
+        div.form-group
+            div.col-sm-offset-2.col-sm-10
+                input#submit_button(type="submit", value="Upload").btn.btn-primary.btn-lg.btn-block
+    div#clearfix
+    div#output
+
+    script(type='text/javascript').
+        function setProgressValue(value,err) {
+            var divprogressbar = $('div[class="progress"]');
+            var progressbar = $('div[role=progressbar]');
+            progressbar.addClass("progress-bar-striped");
+            progressbar.removeClass("progress-bar-success");
+            progressbar.removeClass("progress-bar-danger");
+            progressbar.attr("aria-valuenow", value);
+            progressbar.attr("style", "width: "+value+"%");
+            progressbar.text(value+"%");
+            if (value == 0) {
+                divprogressbar.hide();
+            } else if (value == 100) {
+                divprogressbar.show();
+                progressbar.removeClass("progress-bar-striped");
+                if (!err) {
+                    progressbar.text("Successfull");
+                    progressbar.addClass("progress-bar-success");
+                } else {
+                    progressbar.text(err);
+                    progressbar.addClass("progress-bar-danger");
+                }
+            } else {
+                divprogressbar.show();
+            }
+        };
+
+        function updateProgress(evt) {
+            if (evt.lengthComputable) {
+                //evt.loaded the bytes browser receive
+                //evt.total the total bytes seted by the header
+                var percentComplete = (evt.loaded / evt.total) * 100;
+                setProgressValue(percentComplete);
+            }
+        }
+
+        function transferComplete(evt) {
+            console.log("The transfer is complete. Uploaded =" + evt.loaded+"Bytes");
+        }
+        function transferFailed(evt) {
+            console.log("An error occurred while transferring the file.");
+        }
+        function transferCanceled(evt) {
+            console.log("The transfer has been canceled by the user.");
+        }
+
+        $(':file').change(function(){
+            var errors = [];
+            $.each(this.files,function(idx,file) {
+                name = file.name;
+                size = file.size;
+                type = file.type;
+                if (file.name.length < 1) {
+                    // optional complaint?
+                }
+                else if (file.size > 10000000) {
+                    errors.push("File ["+file.name+"] is to big");
+                } else if (file.type != 'image/png' && file.type != 'image/jpg'
+                        && !file.type != 'image/gif'
+                        && file.type != 'image/jpeg') {
+                    errors.push("File ["+file.name+"] must be png, jpg, or gif");
+                }
+            });
+            $('#output').html(errors.join('</br>'))
+        });
+        $("form#add_photos").submit(function (e) {
+            e.preventDefault();
+            setProgressValue(0);
+
+            var oOutput = $('#output');
+            var input = document.getElementById( 'photo_files' );
+            var url = "/albums/" + $("#albumid").val() + "/photo.json";
+
+            oOutput.removeClass("bg-success");
+            oOutput.removeClass("bg-danger");
+
+            var m = new Date();
+            var dateString =
+                m.getUTCFullYear() +"/"+
+                ("0" + (m.getUTCMonth()+1)).slice(-2) +"/"+
+                ("0" + m.getUTCDate()).slice(-2) + " " +
+                ("0" + m.getUTCHours()).slice(-2) + ":" +
+                ("0" + m.getUTCMinutes()).slice(-2) + ":" +
+                ("0" + m.getUTCSeconds()).slice(-2);
+            $("input#date").val(dateString);
+
+            // var form = $('form[name="add_photo"]');
+            var form = document.forms.namedItem("add_photos");
+            var oData = new FormData(form);
+
+            var oReq = new XMLHttpRequest();
+            oReq.onprogress=updateProgress;
+            oReq.onloadend=transferComplete;
+            oReq.onerror=transferFailed;
+            oReq.onabort=transferCanceled;
+            oReq.open("PUT", url, true);
+            oReq.onreadystatechange = function (aEvt) {
+                if (oReq.readyState == 4) {
+                    if (oReq.status == 200) {
+                        var response = oReq.responseText;
+                        console.log("OK =" +response);
+                        if (response.indexOf("auth") >= 0) {
+                            setProgressValue(100,"Login required");
+                            oOutput.addClass("bg-info");
+                            oOutput.html("Login required");
+                        }
+                        else if (response.indexOf("data") >= 0 && jQuery.parseJSON(response).data) {
+                            setProgressValue(100);
+                            oOutput.addClass("bg-success");
+                            oOutput.html("\
+                                Uploaded! Continue adding or <a href='/pages/album/"
+                                    + $("#albumid").val() + "'>View Album</a>");
+                        }
+                    } else {
+                        console.log("Error = ["+oReq.status +"] "+oReq.responseText);
+                        var error = "Error ["+oReq.status +"]";
+
+                        if (oReq.status >= 300 && oReq.status < 400) {
+                            error=error.concat(" had a redirection error.");
+                        } else if (oReq.status >= 400 && oReq.status < 500) {
+                            error=error.concat(" something wrong with the request.");
+                        } else if (oReq.status >= 500 && oReq.status < 600) {
+                            error=error.concat(" had a server error.");
+                        } else {
+                            error=error.concat(" occurred uploading your file.");
+                        }
+                        setProgressValue(100, error);
+                    }
+                }
+            };
+            oReq.send(oData);
+        });
+
+//block scripts
+    //script(type='text/javascript' src="/bootstrap/file-dialog/js/bootstrap.fd.js")
+    //script(type='text/javascript' src="/bootstrap/dropzone/js/dropzone.js")

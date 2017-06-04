@@ -1,0 +1,66 @@
+extends ../layout
+block content
+    form#create_album(name="create_album").form-horizontal
+        h2 Album form
+        div#error.bg-danger
+        div#success.bg-success
+
+        div.form-group
+            label(for="name").col-sm-2.control-label Album name
+            div.col-sm-10
+                input#name(type="text", name="name", placeholder="Album name", required="", autofocus="").form-control
+
+        div.form-group
+            label(for="title").col-sm-2.control-label Album title
+            div.col-sm-10
+                input#title(type="text", name="title", placeholder="Album title", autofocus="").form-control
+
+        div.form-group
+            label(for="title").col-sm-2.control-label Album description
+            div.col-sm-10
+                textarea#description(name="description", placeholder="Album title", autofocus="", cols="30").form-control
+
+        //input#date(type="hidden", name="date")
+
+        div.form-group
+            div.col-sm-offset-2.col-sm-10
+                input#submit_button(type="submit", value="Submit").btn.btn-primary.btn-lg.btn-block
+    div#clearfix
+
+    script(type='text/javascript').
+        $errordiv = $('div#error');
+        $successdiv = $('div#success');
+        $("form#create_album").submit(function (e) {
+            e.preventDefault();
+
+            var m = new Date();
+            var dateString =
+                m.getUTCFullYear() +"/"+
+                ("0" + (m.getUTCMonth()+1)).slice(-2) +"/"+
+                ("0" + m.getUTCDate()).slice(-2) + " " +
+                ("0" + m.getUTCHours()).slice(-2) + ":" +
+                ("0" + m.getUTCMinutes()).slice(-2) + ":" +
+                ("0" + m.getUTCSeconds()).slice(-2);
+
+            //$("input#date").val(dateString);
+
+            $.ajax({
+                type: "PUT",
+                url: "/albums/albums.json",
+                contentType: 'application/json',    // request payload type
+                data: JSON.stringify( $( this ).serializeJSON() ),
+                success: function (resp) {
+                    $errordiv.html('');
+                    $successdiv.html('Album ' +resp.data.album.name+ ' created');
+                    console.log(resp.data);
+
+                    window.location = "/albums/" + $("input#name").val() + "/photos.json";
+                },
+                error: function (resp) {
+                    var respJson = JSON.parse(resp.responseText);
+                    $successdiv.html('');
+                    $errordiv.html(respJson.message);
+                    console.log(resp);
+                }
+            });
+        });

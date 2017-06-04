@@ -1,0 +1,119 @@
+extends ../layout
+
+block styles
+    //link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css')
+    link(rel='stylesheet', href='//blueimp.github.io/Gallery/css/blueimp-gallery.min.css')
+    link(rel='stylesheet', href='/bootstrap/image-gallery/css/bootstrap-image-gallery.min.css')
+    link(rel='stylesheet', href='/styles/myDropzone.css')
+    link(rel='stylesheet', href='/styles/csshake.min.css')
+
+block content
+    div
+        if (session && session.user)
+            div(role="group").btn-group.pull-right
+                div(role="group").btn-group
+                    a(href="/albums/#{data.album.name}/upload", type="button").btn.btn-default
+                        span Upload&nbsp;&nbsp;
+                        i.glyphicon.glyphicon-cloud-upload
+                    button#deleteButton(type="button").btn.btn-default
+                        span Delete&nbsp;&nbsp;
+                        i.glyphicon.glyphicon-remove
+
+        div.page-header.no_top_margin
+            h1 #{data.album.name} album
+
+    div#album_page.album_page
+        - if (error)
+            p #{error}
+        - else if (has_photos)
+            p There are #{has_photos} photos in this album
+        - else
+            div#blueimp-gallery.blueimp-gallery.blueimp-gallery-controls
+                div.slides
+                h3.title
+                a.prev <
+                a.next >
+                a.close x
+                a.play-pause
+                ol.indicator
+
+            - if (data && data.photos)
+                div#links
+                    each photo in data.photos
+                        div.col-lg-2.col-md-4.col-xs-12
+                            div.remove-image(style="display: none;")
+                                button(type="button", aria-label="Close", photo-filename=photo.filename, photo-url=photo.url).close.remove-image-icon
+                                    i.glyphicon.glyphicon-remove-circle
+                            div
+                                a(href=photo.url, title=photo.filename, target="_blank")
+                                    img(src=photo.url, alt=photo.filename).img-responsive.img-rounded
+            - else
+                p This album does't have any photos in it, sorry
+
+            div(style="clear: left")
+
+
+block scripts
+    script(type='text/javascript' src="/bootstrap/image-gallery/js/bootstrap-image-gallery.min.js")
+    script(type='text/javascript').
+        $('#deleteButton').on('click', function (event) {
+            $("div .remove-image").toggle();
+            $nextDiv = $("div .remove-image").next();
+            $i = $(this).find("i");
+            $span = $(this).find("span");
+            if(/delete/i.test($(this).text())){
+                $i.removeClass("glyphicon-remove");
+                $i.addClass("glyphicon-remove-circle");
+                $span.text("Cancel  ");
+                $(this).removeClass('btn-default');
+                $(this).addClass('btn-danger');
+            } else {
+                $span.text("Delete  ");
+                $i.removeClass("glyphicon-remove-circle");
+                $i.addClass("glyphicon-remove");
+                $(this).removeClass('btn-danger');
+                $(this).addClass('btn-default');
+            }
+        });
+
+        $('#links').on('click','img', function (event) {
+            event = event || window.event;
+            var target = event.target || event.srcElement,
+                link = target.src ? target.parentNode : target,
+                options = {index: link, event: event},
+                links = $( "#links" ).find( "a" );
+            blueimp.Gallery(links, options);
+        });
+
+        $(function() {
+            $( ".remove-image-icon" ).hover(
+                function() {
+                    $( this ).parent().next().addClass( "remove-shake" );
+                }, function() {
+                    $( this ).parent().next().removeClass( "remove-shake" );
+                }
+            );
+            $(".remove-image-icon").click(function(event) {
+                event.preventDefault();
+                $elt = $(this);
+                var url = $(this).attr('photo-url');
+                var data = {
+                    album: "#{data.album.name}",
+                    photo: $(this).attr('photo-filename')
+                };
+
+                deleteAjax (
+                    url,
+                    data,
+                    function(data) {
+                        console.log(JSON.stringify(data));
+                        $elt.parent().parent().remove();
+                        bootstrap_alert.success("Image deleted");
+                    }
+                );
+
+
+            });
+        });
+
+    script(type='text/javascript' src="//blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js")

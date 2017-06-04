@@ -1,0 +1,72 @@
+body {
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.btn-noborder {
+    border: none;
+    background: none;
+}
+
+div#photos {
+  display: inline-table;
+  margin-right: 0.3em;
+  margin-left: 0.3em;
+}
+
+.remove-image {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  z-index: 90;
+}
+.remove-image-icon {
+  font-size: 2.5em;
+}
+
+div#alert_placeholder {
+    position: fixed;
+    width: 31%;
+    z-index: 100;
+    right: 2%;
+}
+
+.floating:hover{
+    -webkit-animation-name: Floatingx;
+    -webkit-animation-duration: 3s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: ease-in-out;
+    -moz-animation-name: Floating;
+    -moz-animation-duration: 3s;
+    -moz-animation-iteration-count: infinite;
+    -moz-animation-timing-function: ease-in-out;
+    margin-left: 30px;
+    margin-top: 5px;
+
+}
+
+@-webkit-keyframes Floatingx{
+    from {-webkit-transform:translate(0, 0px);}
+    65% {-webkit-transform:translate(0, 15px);}
+    to {-webkit-transform: translate(0, -0px);}
+}
+
+@-moz-keyframes Floating{
+    from {-moz-transform:translate(0, 0px);}
+    65% {-moz-transform:translate(0, 15px);}
+    to {-moz-transform: translate(0, -0px);}
+}
+
+.no_top_margin {
+    margin-top: 0px;
+}
+
+.album-frame {
+    position: absolute;
+    top: 30px;
+    left: 35px;
+    z-index: -1;
+}

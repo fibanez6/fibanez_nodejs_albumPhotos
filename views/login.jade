@@ -1,0 +1,109 @@
+extends layout
+
+block styles
+    link(rel='stylesheet', href='/styles/login.css')
+    link(rel='stylesheet', href='/bootstrap/social/css/bootstrap-social.css')
+    link(rel='stylesheet', href='/bootstrap/social/css/font-awesome.min.css')
+
+block content
+    script(type='text/javascript').
+        $("nav").hide();
+
+    div.row
+        div.col-sm-6.col-md-4.col-md-offset-4
+            h2.text-center.login-title Sign in
+            div.account-wall
+                img(src='https://ssl.gstatic.com/accounts/ui/avatar_2x.png').profile-img
+                form#login(name="loggin", method="POST", action='/auth/login').form-signin
+                    div#error.bg-danger
+
+                    label.sr-only(for="email") Email address
+                    input#email(type="email", name="username", placeholder="Email address", required, autofocus).form-control
+
+                    label(for="password").sr-only Password
+                    input#password(type="password", name="password", placeholder="Password", required).form-control
+
+                    div.checkbox
+                        label
+                            input(type="checkbox", name="rememberme", value="remember-me")
+                            | Remember me
+
+                    span.clearfix
+                    input(type="submit", value="login", class="btn btn-lg btn-primary btn-block")
+            //a(href='/signup').text-center.new-account Create an account
+            a(href="/auth/facebook").btn.btn-block.btn-social.btn-facebook
+                i.fa.fa-facebook
+                span Log In With Facebook
+            a(href="/auth/google").btn.btn-block.btn-social.btn-google
+                i.fa.fa-google
+                span Log In With Google
+            a(href="/auth/twitter").btn.btn-block.btn-social.btn-twitter
+                i.fa.fa-twitter
+                span Log In With Twitter
+            div.row(style="padding-top: 5px;")
+                div.col-md-1
+                    a(href="/auth/linkedin").btn.btn-social-icon.btn-linkedin
+                        i.fa.fa-linkedin
+                div.col-md-1
+                    a(href="/auth/github").btn.btn-social-icon.btn-github
+                        i.fa.fa-github
+                div.col-md-1
+                    a(href="/auth/dropbox").btn.btn-social-icon.btn-dropbox
+                        i.fa.fa-dropbox
+                div.col-md-1
+                    a(href="/auth/flickr").btn.btn-social-icon.btn-flickr
+                        i.fa.fa-flickr
+                div.col-md-1
+                    a(href="/auth/instagram").btn.btn-social-icon.btn-instagram
+                        i.fa.fa-instagram
+                div.col-md-1
+                    a(href="/auth/tumblr").btn.btn-social-icon.btn-tumblr
+                        i.fa.fa-tumblr
+                div.col-md-1
+                    a(href="/auth/tumblr").btn.btn-social-icon.btn-yahoo
+                        i.fa.fa-yahoo
+                div.col-md-1
+                    a(href="/auth/openid").btn.btn-social-icon.btn-openid
+                        i.fa.fa-openid
+                div.col-md-1
+                    a(href="/auth/bitbucket").btn.btn-social-icon.btn-bitbucket
+                        i.fa.fa-bitbucket
+                div.col-md-1
+                    a(href="/auth/microsoft").btn.btn-social-icon.btn-microsoft
+                        i.fa.fa-windows
+                div.col-md-1
+                    a(href="/auth/vimeo").btn.btn-social-icon.btn-vimeo
+                        i.fa.fa-vimeo
+
+            if message
+                div
+                    h1.text-center.error-message #{message}
+
+    div#clearfix
+
+    //script(type='text/javascript').
+//        $("form#login").submit(function (e) {
+//            e.preventDefault();
+//            if (!$("input#email").val() || !$("input#password").val()) {
+//                $("#error").html("You need to enter an email and password.");
+//            } else {
+//                $.ajax({
+//                    type: "POST",
+//                    url: "/login",
+//                    data: JSON.stringify($("form#login").serializeJSON()),
+//                    contentType: "application/json; charset=utf-8",
+//                    dataType: "json",
+//                    success: function (data) {
+//                        console.log(data);
+//                        window.location = "/pages/admin/home";
+//                    },
+//                    error: function (err) {
+//                        console.log(err);
+//                        var ext = window.location.href.match(/(fail)/) ? "" : "?fail";
+//                        window.location = window.location + ext;
+//                        return false;
+//                    }
+//                });
+//            }
+//            return false;
+//        });
